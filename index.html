@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Cure Run · Endless runner 3D</title>
+<meta name="description" content="The Cure Run: un endless runner 3D en un pasillo de hospital, inspirado en el videoclip de «the cure» de Olivia Rodrigo. Juega gratis en el navegador.">
+<link rel="icon" href="img/heart_red.png">
+<style>
+@font-face{font-family:"Poppins";font-weight:500;src:url(fonts/Poppins-Medium.ttf) format("truetype");font-display:swap}
+@font-face{font-family:"Poppins";font-weight:700;src:url(fonts/Poppins-Bold.ttf) format("truetype");font-display:swap}
+@font-face{font-family:"Poppins";font-weight:700;font-style:italic;src:url(fonts/Poppins-BoldItalic.ttf) format("truetype");font-display:swap}
+:root{
+  --crimson:#C8202F; --crimson-d:#8E1422; --cream:#FFF3F0; --pink:#F2A7B2; --pink-l:#FBD6DB;
+  --wine:#3A0A14; --ink:#2A0A10; --teal:#2BA89A;
+}
+*{box-sizing:border-box;margin:0}
+html{scroll-behavior:smooth;scroll-padding-top:76px}
+body{font-family:"Poppins",system-ui,sans-serif;font-weight:500;background:var(--cream);color:var(--ink);line-height:1.65;font-size:1.0625rem}
+a{color:inherit}
+:focus-visible{outline:3px solid var(--crimson);outline-offset:3px}
+.wrap{width:min(1120px,92%);margin-inline:auto}
+h1,h2,h3{font-weight:700;font-style:italic;line-height:1.1;letter-spacing:-.01em}
+h2{font-size:clamp(2rem,4.5vw,3rem);color:var(--crimson)}
+h3{font-size:1.25rem}
+p{max-width:62ch}
+section{padding:5.5rem 0}
+
+/* ---- Encabezado ---- */
+header{position:sticky;top:0;z-index:20;background:rgba(58,10,20,.96);backdrop-filter:blur(6px);color:var(--cream)}
+.bar{display:flex;align-items:center;justify-content:space-between;gap:1rem;padding:.8rem 0}
+.brand{display:flex;align-items:center;gap:.6rem;text-decoration:none;font-weight:700;font-style:italic;font-size:1.25rem}
+.brand img{width:32px;height:32px}
+nav ul{display:flex;gap:.25rem;list-style:none;padding:0;flex-wrap:wrap}
+nav a{display:block;padding:.45rem .85rem;border-radius:999px;text-decoration:none;font-size:.95rem}
+nav a:hover{background:rgba(255,255,255,.12)}
+nav a.play{background:var(--crimson);font-weight:700}
+nav a.play:hover{background:#e02a3b}
+
+/* ---- Principal ---- */
+.hero{background:var(--wine);color:var(--cream);padding:4.5rem 0 5rem;position:relative;overflow:hidden}
+.hero::before{content:"";position:absolute;inset:0;background:radial-gradient(60% 70% at 78% 40%,rgba(200,32,47,.55),transparent 70%)}
+.hero .wrap{position:relative;display:grid;grid-template-columns:1.05fr .95fr;gap:3rem;align-items:center}
+.tag{display:inline-block;border:2px solid var(--pink);color:var(--pink);border-radius:999px;padding:.2rem .9rem;font-size:.9rem;font-weight:700;margin-bottom:1.2rem}
+.hero h1{font-size:clamp(3.2rem,9vw,6.6rem);color:var(--cream);text-shadow:4px 4px 0 var(--crimson)}
+.hero .lema{font-size:clamp(1.15rem,2.4vw,1.55rem);color:var(--pink);margin:1.3rem 0 .8rem;font-weight:700;font-style:italic}
+.hero p.sub{color:#f3d9dd}
+.cta{display:flex;flex-wrap:wrap;gap:.9rem;margin:2rem 0}
+.btn{display:inline-block;text-decoration:none;font-weight:700;padding:.9rem 1.7rem;border-radius:999px;border:2px solid var(--crimson);transition:transform .15s}
+.btn:hover{transform:translateY(-2px)}
+.btn.main{background:var(--crimson);color:#fff;font-size:1.1rem;box-shadow:0 6px 0 var(--crimson-d)}
+.btn.sec{border-color:var(--pink);color:var(--pink)}
+.metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:.8rem;max-width:520px}
+.metric{background:rgba(255,243,240,.08);border:1px solid rgba(242,167,178,.35);border-radius:14px;padding:.8rem .9rem}
+.metric b{display:block;font-size:1.5rem;font-style:italic;color:#fff;line-height:1.2}
+.metric span{font-size:.82rem;color:var(--pink)}
+.art{position:relative;aspect-ratio:4/3.4}
+.art .shot{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:18px;border:3px solid var(--pink);z-index:3}
+.art .sign{position:absolute;width:82%;left:9%;top:14%;border-radius:6px;transform:rotate(-4deg);box-shadow:0 24px 50px rgba(0,0,0,.45);z-index:1}
+.art .h{position:absolute;z-index:2;filter:drop-shadow(0 8px 14px rgba(0,0,0,.4))}
+.art .h1{width:24%;left:2%;top:4%;animation:flota 5s ease-in-out infinite}
+.art .h2{width:17%;right:4%;top:0;animation:flota 6s ease-in-out -2s infinite}
+.art .h3{width:20%;right:12%;bottom:6%;animation:flota 5.5s ease-in-out -1s infinite}
+.art .h4{width:13%;left:14%;bottom:8%}
+@keyframes flota{50%{transform:translateY(-14px)}}
+
+/* ---- Historia ---- */
+.historia .cols{display:grid;grid-template-columns:1fr 1fr;gap:2.5rem;margin-top:2rem}
+.historia p+p{margin-top:1rem}
+.cita{margin-top:2.5rem;padding:1.4rem 1.8rem;border-left:6px solid var(--crimson);background:var(--pink-l);border-radius:0 14px 14px 0;font-weight:700;font-style:italic;font-size:1.25rem;color:var(--crimson-d);max-width:none}
+
+/* ---- Personaje ---- */
+.personaje{background:var(--pink-l)}
+.pj{display:grid;grid-template-columns:.8fr 1.2fr;gap:3rem;align-items:center;margin-top:2rem}
+.pj-img{position:relative;border-radius:18px;background:var(--cream);border:3px solid var(--crimson);aspect-ratio:3/4;overflow:hidden;display:grid;place-items:center}
+.pj-img img.ph{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.pj-img .fallback{text-align:center;padding:1.5rem}
+.pj-img .fallback img{width:42%;margin:0 auto .6rem}
+.pj-img .fallback small{display:block;color:var(--crimson-d)}
+.rasgos{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-top:1.5rem}
+.rasgo{background:var(--cream);border-radius:14px;padding:1rem 1.2rem}
+.rasgo h3{color:var(--crimson);font-size:1.05rem;margin-bottom:.3rem}
+.rasgo p{font-size:.97rem}
+
+/* ---- Mecánicas ---- */
+.teclas{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:1rem;margin:2rem 0}
+.tecla{background:var(--wine);color:var(--cream);border-radius:16px;padding:1.2rem}
+.tecla kbd{display:inline-block;background:var(--cream);color:var(--crimson);font:700 1rem "Poppins",sans-serif;border-radius:8px;border-bottom:4px solid var(--pink);padding:.15rem .7rem;margin:0 .15rem .4rem 0}
+.tecla p{font-size:.95rem;color:#f3d9dd}
+.tecla strong{display:block;font-size:1.1rem;margin-bottom:.3rem;font-style:italic}
+.tabla{width:100%;border-collapse:collapse;margin-top:1rem;font-size:.98rem}
+.tabla th,.tabla td{text-align:left;padding:.8rem 1rem;border-bottom:2px solid var(--pink-l);vertical-align:top}
+.tabla th{background:var(--crimson);color:#fff;font-style:italic}
+.tabla-wrap{overflow-x:auto}
+.reglas{display:grid;grid-template-columns:1fr 1fr;gap:1.2rem;margin-top:2rem}
+.regla{border-radius:16px;padding:1.3rem 1.5rem}
+.regla.ok{background:var(--pink-l)}
+.regla.no{background:var(--wine);color:var(--cream)}
+.regla h3{margin-bottom:.4rem}
+.regla.ok h3{color:var(--crimson)}
+.regla.no h3{color:var(--pink)}
+
+/* ---- Datos ---- */
+.datos{background:var(--wine);color:var(--cream)}
+.datos h2{color:var(--pink)}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1rem;margin:2rem 0}
+.card{background:rgba(255,243,240,.07);border:1px solid rgba(242,167,178,.35);border-radius:16px;padding:1.3rem}
+.card b{display:block;font-size:2.4rem;font-style:italic;color:#fff;line-height:1.1}
+.card span{color:var(--pink);font-size:.95rem}
+.grafico{background:var(--cream);color:var(--ink);border-radius:18px;padding:1.6rem 1.8rem}
+.grafico h3{color:var(--crimson);margin-bottom:.2rem}
+.grafico>p{font-size:.95rem;margin-bottom:1rem}
+.barras{display:flex;align-items:flex-end;gap:6px;height:190px;border-bottom:3px solid var(--crimson)}
+.barras div{flex:1;background:var(--pink);border-radius:6px 6px 0 0;position:relative;min-width:0}
+.barras div:last-child{background:var(--crimson)}
+.barras div span{position:absolute;top:-1.5rem;left:50%;transform:translateX(-50%);font-size:.72rem;font-weight:700;color:var(--crimson-d)}
+.ejex{display:flex;gap:6px;font-size:.72rem;color:var(--crimson-d);text-align:center;margin-top:.3rem}
+.ejex span{flex:1}
+
+/* ---- Jugar ---- */
+.jugar{text-align:center}
+.jugar h2,.jugar p{margin-inline:auto}
+.marco{margin:2rem auto 1rem;max-width:960px;aspect-ratio:16/9;background:var(--wine);border:4px solid var(--crimson);border-radius:18px;overflow:hidden;box-shadow:0 10px 0 var(--crimson-d);position:relative}
+.marco iframe{width:100%;height:100%;border:0;display:block}
+.acciones{display:flex;gap:.8rem;justify-content:center;flex-wrap:wrap;margin-bottom:2.5rem}
+.btn.dark{background:var(--wine);border-color:var(--wine);color:var(--cream)}
+.req{text-align:left;display:grid;grid-template-columns:1fr 1fr;gap:1.2rem;max-width:960px;margin:0 auto}
+.req div{background:var(--pink-l);border-radius:16px;padding:1.3rem 1.5rem}
+.req h3{color:var(--crimson);margin-bottom:.5rem}
+.req ul{padding-left:1.2rem}
+.req li{margin:.25rem 0;font-size:.97rem}
+
+/* ---- Pie ---- */
+footer{background:var(--wine);color:var(--cream);padding:3.5rem 0 2.5rem}
+.creditos{display:flex;flex-wrap:wrap;gap:2rem 4rem;justify-content:space-between;align-items:flex-start}
+footer h3{color:var(--pink);margin-bottom:.6rem}
+footer ul{list-style:none;padding:0}
+footer li{font-size:1.15rem;font-weight:700}
+footer small{display:block;margin-top:2rem;color:#d8b3b9;font-size:.85rem;max-width:80ch;line-height:1.5}
+
+@media(max-width:860px){
+  .hero .wrap,.historia .cols,.pj,.reglas,.req{grid-template-columns:1fr}
+  .rasgos{grid-template-columns:1fr}
+  .art{max-width:460px;margin-inline:auto}
+  nav ul{justify-content:flex-end}
+  section{padding:4rem 0}
+  .bar{flex-wrap:wrap}
+}
+@media(max-width:520px){.metrics{grid-template-columns:1fr 1fr 1fr;gap:.5rem}.metric b{font-size:1.15rem}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap bar">
+    <a class="brand" href="#inicio" aria-label="The Cure Run, inicio"><img src="img/heart_red.png" alt="">The Cure Run</a>
+    <nav aria-label="Navegación principal">
+      <ul>
+        <li><a href="#historia">Historia</a></li>
+        <li><a href="#personaje">Personaje</a></li>
+        <li><a href="#mecanicas">Mecánicas</a></li>
+        <li><a href="#datos">Datos</a></li>
+        <li><a class="play" href="#jugar">Jugar ahora</a></li>
+      </ul>
+    </nav>
+  </div>
+</header>
+
+<main>
+<!-- PRINCIPAL -->
+<section class="hero" id="inicio">
+  <div class="wrap">
+    <div>
+      <span class="tag">ENDLESS RUNNER 3D</span>
+      <h1>THE CURE RUN</h1>
+      <p class="lema">No dejes que apaguen tu corazón.</p>
+      <p class="sub">Una enfermera corre por el pasillo interminable de un hospital. Salta los antídotos, agáchate bajo los corazones y el candelabro, y cruza cada puerta antes de que tu corazón se vuelva negro. Cada puerta acelera el juego y la canción.</p>
+      <div class="cta">
+        <a class="btn main" href="#jugar">JUGAR AHORA</a>
+        <a class="btn sec" href="#historia">Conoce la historia</a>
+      </div>
+      <div class="metrics" aria-label="Datos rápidos">
+        <div class="metric"><b>3</b><span>vidas al iniciar</span></div>
+        <div class="metric"><b>500</b><span>récord a superar</span></div>
+        <div class="metric"><b>↑ ↓</b><span>saltar y agacharse</span></div>
+      </div>
+    </div>
+    <div class="art" aria-hidden="false">
+      <img class="sign" src="img/sign_cure.png" alt="Cartel «the cure: tratamiento disponible aquí» del pasillo del juego">
+      <img class="h h1" src="img/heart_red.png" alt="">
+      <img class="h h2" src="img/heart_black.png" alt="">
+      <img class="h h3" src="img/heart_red.png" alt="">
+      <img class="h h4" src="img/heart_black.png" alt="">
+      <!-- Cuando tengas una captura del juego, guárdala como img/captura-juego.jpg y cubrirá este arte automáticamente -->
+      <img class="shot" src="img/captura-juego.jpg" alt="Captura de The Cure Run: la enfermera corriendo por el pasillo" onerror="this.remove()">
+    </div>
+  </div>
+</section>
+
+<!-- HISTORIA -->
+<section class="historia" id="historia">
+  <div class="wrap">
+    <h2>Historia</h2>
+    <div class="cols">
+      <div>
+        <h3>El pasillo</h3>
+        <p>The Cure Run está ambientado en un hospital de paredes rosadas y pisos de damero, iluminado por luces que cambian de color en cada nivel. Carteles, afiches con corazones, un extintor y bolsas de suero decoran un pasillo que no termina, y al fondo siempre hay una puerta de quirófano cerrada.</p>
+        <p>El juego toma como inspiración el videoclip de «the cure» de Olivia Rodrigo: su estética de hospital, su paleta rosa y roja y la idea de que el dolor del corazón se trata, o se esquiva, a toda velocidad.</p>
+      </div>
+      <div>
+        <h3>El motivo para correr</h3>
+        <p>Una enfermera lleva su teléfono en la mano y no puede detenerse: en el pasillo aparecen antídotos, corazones y un candelabro que amenazan con apagar el suyo. Cada choque ennegrece un corazón y la deja con una vida menos.</p>
+        <p>Cada 20 segundos se abre una puerta al fondo. Cruzarla significa avanzar un nivel, pero también que todo va más rápido. La meta no es llegar a un final, sino resistir lo suficiente para superar el récord.</p>
+      </div>
+    </div>
+    <p class="cita">«No dejes que apaguen tu corazón.»</p>
+  </div>
+</section>
+
+<!-- PERSONAJE -->
+<section class="personaje" id="personaje">
+  <div class="wrap">
+    <h2>Personaje principal: la enfermera</h2>
+    <div class="pj">
+      <div class="pj-img">
+        <img class="ph" src="img/enfermera.jpg" alt="La enfermera, protagonista de The Cure Run" onerror="this.remove()">
+        <div class="fallback"><img src="img/heart_red.png" alt=""><strong>La enfermera</strong><small>Agrega tu captura como img/enfermera.jpg</small></div>
+      </div>
+      <div>
+        <p>La enfermera es la única protagonista y la que el jugador controla. Corre sin parar por el pasillo, y su modelo 3D tiene animaciones propias para correr, saltar, agacharse y hablar por teléfono en el menú.</p>
+        <div class="rasgos">
+          <div class="rasgo"><h3>Rol</h3><p>Corredora del pasillo del hospital. Su objetivo es mantener vivo su corazón y llegar lo más lejos posible.</p></div>
+          <div class="rasgo"><h3>Salto</h3><p>Sube por encima de los antídotos y del corazón pequeño que llegan por el suelo.</p></div>
+          <div class="rasgo"><h3>Agacharse</h3><p>Reduce su tamaño para pasar bajo el corazón mediano y el candelabro colgante.</p></div>
+          <div class="rasgo"><h3>Rasgos distintivos</h3><p>Uniforme de enfermera sobre una paleta rosa, crema y roja, siempre con el teléfono a mano.</p></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- MECÁNICAS -->
+<section id="mecanicas">
+  <div class="wrap">
+    <h2>Mecánicas y controles</h2>
+    <p>Se juega solo con el teclado. La enfermera corre sola: tú decides cuándo saltar y cuándo agacharte.</p>
+    <div class="teclas">
+      <div class="tecla"><kbd>↑</kbd><kbd>W</kbd><strong>Saltar</strong><p>Esquiva los obstáculos bajos.</p></div>
+      <div class="tecla"><kbd>↓</kbd><kbd>S</kbd><strong>Agacharse</strong><p>Pasa bajo los obstáculos altos. Se mantiene mientras la tecla esté presionada.</p></div>
+      <div class="tecla"><kbd>Enter</kbd><kbd>Espacio</kbd><strong>Elegir</strong><p>Comienza la partida y confirma las opciones del menú.</p></div>
+      <div class="tecla"><kbd>Esc</kbd><strong>Pausa</strong><p>Detiene y reanuda la partida.</p></div>
+      <div class="tecla"><kbd>R</kbd><strong>Jugar de nuevo</strong><p>Reinicia la partida cuando termina.</p></div>
+    </div>
+
+    <h3 style="color:var(--crimson)">Obstáculos</h3>
+    <div class="tabla-wrap">
+      <table class="tabla">
+        <thead><tr><th>Obstáculo</th><th>Tipo</th><th>Cómo esquivarlo</th></tr></thead>
+        <tbody>
+          <tr><td>Antídoto pequeño</td><td>Bajo</td><td>Saltar</td></tr>
+          <tr><td>Antídoto grande</td><td>Bajo</td><td>Saltar</td></tr>
+          <tr><td>Corazón pequeño</td><td>Bajo</td><td>Saltar</td></tr>
+          <tr><td>Corazón mediano</td><td>Alto</td><td>Agacharse</td></tr>
+          <tr><td>Candelabro colgante</td><td>Alto</td><td>Agacharse</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="reglas">
+      <div class="regla ok">
+        <h3>Cómo se gana puntaje</h3>
+        <p>Sumas 10 puntos por cada segundo que sobrevives. Si superas el récord guardado en tu navegador (500 al inicio), el juego marca «¡Nuevo récord!». No hay elementos que recolectar: lo único que importa es no chocar.</p>
+      </div>
+      <div class="regla no">
+        <h3>Cómo se pierde</h3>
+        <p>Empiezas con 3 vidas. Cada choque te quita una, ennegrece el corazón del obstáculo y te da 1,5 segundos de invulnerabilidad. Al quedarte sin vidas aparece «JUEGO TERMINADO».</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- DATOS -->
+<section class="datos" id="datos">
+  <div class="wrap">
+    <h2>Datos e infografía</h2>
+    <div class="cards">
+      <div class="card"><b>3</b><span>vidas iniciales</span></div>
+      <div class="card"><b>20 s</b><span>entre puerta y puerta</span></div>
+      <div class="card"><b>+10 %</b><span>velocidad por cada puerta</span></div>
+      <div class="card"><b>10</b><span>puntos por segundo</span></div>
+      <div class="card"><b>500</b><span>récord inicial</span></div>
+      <div class="card"><b>5</b><span>tipos de obstáculos</span></div>
+    </div>
+    <div class="grafico">
+      <h3>La velocidad sube con cada puerta</h3>
+      <p>Velocidad de la enfermera por nivel, en unidades por segundo. Empieza en 8 y se detiene en 25 desde el nivel 13.</p>
+      <div class="barras" role="img" aria-label="Gráfico de barras: la velocidad pasa de 8 en el nivel 1 a 25 en el nivel 13">
+        <!-- alturas = velocidad/25 de 190px; 8*1.1^n limitado a 25 -->
+        <div style="height:32%"><span>8</span></div>
+        <div style="height:35.2%"><span>8,8</span></div>
+        <div style="height:38.7%"><span>9,7</span></div>
+        <div style="height:42.6%"><span>10,6</span></div>
+        <div style="height:46.9%"><span>11,7</span></div>
+        <div style="height:51.5%"><span>12,9</span></div>
+        <div style="height:56.7%"><span>14,2</span></div>
+        <div style="height:62.4%"><span>15,6</span></div>
+        <div style="height:68.6%"><span>17,1</span></div>
+        <div style="height:75.5%"><span>18,9</span></div>
+        <div style="height:83%"><span>20,8</span></div>
+        <div style="height:91.3%"><span>22,9</span></div>
+        <div style="height:100%"><span>25</span></div>
+      </div>
+      <div class="ejex" aria-hidden="true"><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span><span>9</span><span>10</span><span>11</span><span>12</span><span>13</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- JUGAR -->
+<section class="jugar" id="jugar">
+  <div class="wrap">
+    <h2>Jugar ahora</h2>
+    <p>Haz clic dentro del juego para activarlo y usa el teclado. Para una mejor experiencia, ábrelo en pantalla completa.</p>
+    <div class="marco">
+      <iframe id="juego" src="juego/index.html" title="The Cure Run, juego" allow="fullscreen; autoplay" allowfullscreen loading="lazy"></iframe>
+    </div>
+    <div class="acciones">
+      <button class="btn main" type="button" id="full" style="cursor:pointer;font-family:inherit;font-size:1rem">Pantalla completa</button>
+      <a class="btn dark" href="juego/index.html" target="_blank" rel="noopener">Abrir en otra pestaña</a>
+    </div>
+    <div class="req">
+      <div>
+        <h3>Requisitos mínimos</h3>
+        <ul>
+          <li>Computador con teclado (no funciona con el celular)</li>
+          <li>Google Chrome, Microsoft Edge o Firefox actualizados</li>
+          <li>WebGL 2 y aceleración por hardware activados</li>
+          <li>4 GB de RAM y conexión estable para la primera carga</li>
+        </ul>
+      </div>
+      <div>
+        <h3>Si algo no funciona</h3>
+        <ul>
+          <li>La primera carga tarda unos segundos: espera a que termine la barra</li>
+          <li>Si no suena, haz clic en el juego: el navegador pide una interacción antes de reproducir audio</li>
+          <li>Si se ve negro, activa la aceleración por hardware o prueba otro navegador</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="creditos">
+      <div>
+        <h3>Creadores del juego</h3>
+        <ul>
+          <li>Denis Medrano Carrasco</li>
+          <li>Ariana Patzi Gonzales</li>
+        </ul>
+      </div>
+      <div>
+        <h3>The Cure Run</h3>
+        <p>Proyecto de Game Development desarrollado en Unity 6.</p>
+      </div>
+    </div>
+    <small>Proyecto académico sin fines de lucro, inspirado en el videoclip de «the cure» de Olivia Rodrigo. No está afiliado ni respaldado por la artista ni por su sello. La canción y las marcas pertenecen a sus respectivos titulares.</small>
+  </div>
+</footer>
+
+<script>
+document.getElementById("full").addEventListener("click",function(){
+  var f=document.getElementById("juego");
+  var r=f.requestFullscreen||f.webkitRequestFullscreen;
+  if(r){r.call(f)}else{window.open("juego/index.html","_blank")}
+});
+</script>
+</body>
+</html>
